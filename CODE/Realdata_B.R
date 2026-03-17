@@ -131,7 +131,7 @@ plan(multisession, workers = 6)
 registerDoFuture()
 handlers(global = TRUE)
 
-for (cc in c(10)) {
+for (cc in c(5)) {
   subsize = cc * p
   
   set.seed(1000)
