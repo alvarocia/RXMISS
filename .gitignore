@@ -1,0 +1,8 @@
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
+.DS_Store
+OUTPUT/results.txt
+OUTPUT/simulaciones_kernel_pruebas.docx
+CODE/Simulation_previous.R
