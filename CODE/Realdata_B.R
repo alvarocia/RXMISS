@@ -121,12 +121,6 @@ if (length(y) > 10000) {
   crmfit_coef = crmfit$coefficient
 }
 
-
-
-# numCores <- parallel::detectCores()-1
-# cl <- makeCluster(numCores)
-# registerDoParallel(cl)
-
 plan(multisession, workers = 6)
 registerDoFuture()
 handlers(global = TRUE)
@@ -144,8 +138,7 @@ for (cc in c(5)) {
                                                                             2)))
   }
   
-  
-  ptm = proc.time()
+
   
   with_progress({
     prog <- progressor(steps = nloop)
@@ -295,6 +288,10 @@ for (cc in c(5)) {
   colnames(mse.mat) = c("unif", "lev", "shrink9", "unwtlev", "IBOSS", "LowCon", "MISS")
   rownames(mse.mat) = c("Full_OLS", "M-estimator", "CRM", "Spline")
   
+  bias.mat = matrix(NA, 4, 7)
+  colnames(bias.mat) = c("unif", "lev", "shrink9", "unwtlev", "IBOSS", "LowCon", "MISS")
+  rownames(bias.mat) = c("Full_OLS", "M-estimator", "CRM", "Spline")
+  
   mspe.mat = matrix(NA, 1, 7)
   colnames(mspe.mat) = c("unif", "lev", "shrink9", "unwtlev", "IBOSS", "LowCon", "MISS")
   rownames(mspe.mat) = c("MSPE")
@@ -335,6 +332,29 @@ for (cc in c(5)) {
                      mse.IBOSS,
                      mse.LowCon,
                      mse.MISS)
+    
+    
+    y.pred_true = cbind(1, as.matrix(x))%*%bt.temp
+    
+    
+    bias.unif = mspe_beta(bt.unif, x, y.pred_true)
+    bias.lev = mspe_beta(bt.lev, x, y.pred_true)
+    bias.unwt.lev = mspe_beta(bt.unwt.lev, x, y.pred_true)
+    bias.shrink9 = mspe_beta(bt.shrink9, x, y.pred_true)
+    bias.LowCon = mspe_beta(bt.LowCon, x, y.pred_true)
+    bias.IBOSS = mspe_beta(bt.IBOSS, x, y.pred_true)
+    bias.MISS = mspe_beta(bt.MISS, x, y.pred_true)
+    
+    bias.mat[i, ] = c(bias.unif,
+                     bias.lev,
+                     bias.shrink9,
+                     bias.unwt.lev,
+                     bias.IBOSS,
+                     bias.LowCon,
+                     bias.MISS)
+
+    
+    
     if (i==1){
     
     mspe.unif = mspe_beta(bt.unif, x, y)
@@ -358,5 +378,6 @@ for (cc in c(5)) {
   print(round(mse.mat, digits = 2))
   cat("#################  MSPE  #######################","\n")
   print(round(mspe.mat, digits = 2))
+  cat("#################  BIAS  #######################","\n")
+  print(round(bias.mat, digits = 2))
 }
-# stopCluster(cl)
